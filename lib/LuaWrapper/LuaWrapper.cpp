@@ -1,27 +1,55 @@
 #include <LuaWrapper.h>
 
-Lua::Lua(Stream *serial) {
-  this->serial = serial;
+int Lua::luaLoadFile(lua_State *L) {
+  const char* fileName = lua_tostring(L, 1);
+  check(luaL_loadfile(L, fileName));
+  lua_call(L, 0, 1);
+  return 1;
 }
 
-Lua::~Lua() {
-  lua_close(L);
-}
+Lua::~Lua() { lua_close(L); }
 
 /**
  * Create a new lua state and setup libraries
  */
-void Lua::begin() {
-  // Enable printf/sprintf to print floats for Teensy.
-  asm(".global _printf_float");
-  L = luaL_newstate();
-  luaL_openlibs(L);
-  lua_settop(L, 0);
+void Lua::begin(Stream* serial) {
+  this->serial = serial;
+  initState();
 }
 
 void Lua::reset() {
   if (L != NULL) lua_close(L);
-  begin();
+  initState();
+}
+
+void Lua::initState() {
+  // Enable printf/sprintf to print floats for Teensy.
+  asm(".global _printf_float");
+
+  L = luaL_newstate();
+  luaL_openlibs(L);
+  lua_settop(L, 0);
+
+  registerPolyfills();
+}
+
+void Lua::registerPolyfills() {
+  // Polyfill lua's `require` function.
+  static Lua *that = this;
+  registerFunction("loadfile", [](lua_State* L) {
+    return that->luaLoadFile(L);
+  });
+  execute(
+    "_LOADED = {}\n"
+    "function require(moduleName)\n"
+    "  if _LOADED[moduleName] == nil then\n"
+    "    local root = 'lua/'\n"
+    "    local path = string.gsub(moduleName, '%.', '/')\n"
+    "    _LOADED[moduleName] = loadfile(root .. path .. '.lua')\n"
+    "  end\n"
+    "  return _LOADED[moduleName]\n"
+    "end\n"
+  );
 }
 
 /**

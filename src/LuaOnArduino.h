@@ -5,39 +5,26 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <OSCLogger.h>
+#include <OSCBridge.h>
 #include <SerialFileTransfer.h>
+#include <LuaWrapper.h>
 
 class LuaOnArduino {
 public:
   SLIPSerial* slipSerial;
   OSCLogger logger;
-  static const uint16_t fileNameLength = 256;
+  OSCBridge bridge;
+  Lua lua;
 
 private:
-  enum ReadSerialMode {
-    ReadSerialModeOSC,
-    ReadSerialModeFile
-  };
-
-  typedef void (*OscInputHandler)(OSCBundle &oscInput);
-
   SerialFileTransfer fileTransfer;
-  ReadSerialMode readSerialMode = ReadSerialModeOSC;
-  OscInputHandler oscInputHandler;
-
-  void handleOscInput(OSCBundle &oscInput);
-  void readFile(char *fileName);
 
 public:
   LuaOnArduino(SLIPSerial *slipSerial);
+
+  void handleOscInput(OSCBundle &oscInput);
   void begin();
-
-  void sendMessage(OSCMessage &message);
-  void sendRaw();
-
   void update();
-  
-  void onOscInput(OscInputHandler handler) { oscInputHandler = handler; }
 };
 
 #endif

@@ -17,9 +17,8 @@ public:
   Stream *serial;
   lua_State *L;  
 
-  Lua(Stream* serial);
   ~Lua();
-  void begin();
+  void begin(Stream* serial);
   void reset();
 
   bool check(int error);
@@ -42,6 +41,9 @@ public:
   void onErrorEnd(Callback handler) { handleErrorEnd = handler; }
 
 private:
+  void initState();
+  int luaLoadFile(lua_State *L);
+  void registerPolyfills();
   void errorBegin() { if (handleErrorBegin != NULL) handleErrorBegin(); }
   void errorEnd() { if (handleErrorEnd != NULL) handleErrorEnd(); }
 };

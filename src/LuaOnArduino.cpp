@@ -6,20 +6,30 @@ LuaOnArduino::LuaOnArduino(SLIPSerial *slipSerial) {
 
 void LuaOnArduino::begin() {
   logger.begin(slipSerial);
-  fileTransfer.begin(slipSerial, &logger);
+  bridge.begin(slipSerial);
+  lua.begin(slipSerial);
+  fileTransfer.begin(slipSerial, &bridge, &logger);
+
+  static LuaOnArduino *that = this;
+
+  bridge.onOscInput([](OSCBundle &oscInput) {
+    that->handleOscInput(oscInput);
+  });
+
+  bridge.onRawInput([](uint8_t c) {
+    that->fileTransfer.write(c);
+  });
+
+  bridge.onRawInputEnd([]() {
+    that->fileTransfer.endWriteFile();
+  });
+
+  lua.onErrorBegin([]() { that->logger.errorBegin(); });
+  lua.onErrorEnd([]() { that->logger.logEnd(); });
 }
 
-/**
- * Send an SLIP packet containing an OSC message and empty the message
- * afterwards.
- * @param message The OSC message.
- */
-void LuaOnArduino::sendMessage(OSCMessage &message) {
-  slipSerial->beginPacket();
-  message.send(*slipSerial);
-  slipSerial->endPacket();
-  message.empty();
-}
+void LuaOnArduino::update() { bridge.update(); }
+
 
 /**
  * Dispatch incoming OSC messages.
@@ -28,69 +38,30 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
   if (oscInput.hasError()) return;
 
   static LuaOnArduino* that = this;
+  static const uint16_t fileNameLength = that->fileTransfer.fileNameLength;
+  static char fileName[fileNameLength];
 
   oscInput.dispatch("/read-file", [](OSCMessage &message) {
-    char fileName[that->fileNameLength];
     message.getString(0, fileName, fileNameLength);
-    that->readFile(fileName);
+    that->fileTransfer.readFile(fileName);
   });
 
   oscInput.dispatch("/file", [](OSCMessage &message) {
     message.getString(0, that->fileTransfer.fileWriteName, fileNameLength);
+    // Start reading tha raw serial input. The readSerialMode is switched back
+    // to OSC mode as soon as the raw slip packet ends.
+    that->bridge.setReadSerialMode(OSCBridge::ReadSerialModeRaw);
     that->fileTransfer.startWriteFile();
   });
 
-  if (oscInputHandler != NULL) oscInputHandler(oscInput);
-}
-
-/**
- * Read and send a file from the SD card with an accompanying message.
- */
-void LuaOnArduino::readFile(char *fileName) {
-  if (!fileTransfer.startReadFile(fileName)) {
-    logger.errorBegin();
-    slipSerial->printf("Couldn't open file `%s`.", fileName);
-    logger.logEnd();
-    return;
-  }
-
-  OSCMessage message("/file");
-  message.add(fileName);
-  sendMessage(message);
-
-  slipSerial->beginPacket();
-  fileTransfer.readFile();
-  slipSerial->endPacket();
-}
-
-/**
- * Read from the serial and, depending on which `serialReadMode` we're in, treat
- * the received data as an OSC input or a file.
- */
-void LuaOnArduino::update() {
-  OSCBundle oscInput;
-
-  if (slipSerial->available()) {
-    while (!slipSerial->endOfPacket()) {
-      while (slipSerial->available()) {
-        int c = slipSerial->read();
-        if (readSerialMode == ReadSerialModeOSC) {
-          oscInput.fill(c);
-        } else if (readSerialMode == ReadSerialModeFile) {
-          fileTransfer.write(c);
-        }
-      }
+  oscInput.dispatch("/lua/execute-file", [](OSCMessage &message) {
+    message.getString(0, fileName, fileNameLength);
+    
+    if (that->lua.executeFile(fileName)) {
+      OSCMessage message("/success/lua/execute-file");
+      that->bridge.sendMessage(message);
+    } else {
+      that->logger.error("Couldn't execute lua file");
     }
-  }
-
-  if (readSerialMode == ReadSerialModeOSC) {
-    handleOscInput(oscInput);
-  } else if (readSerialMode == ReadSerialModeFile) {
-    OSCMessage message("/success/file");
-    message.add(fileTransfer.fileWriteName);
-    sendMessage(message);
-
-    readSerialMode = ReadSerialModeOSC;
-    fileTransfer.endWriteFile();
-  }
+  });
 }

@@ -1,24 +1,36 @@
 #include <SerialFileTransfer.h>
 
-void SerialFileTransfer::begin(SLIPSerial *slipSerial, OSCLogger *logger) {
+void SerialFileTransfer::begin(
+  SLIPSerial *slipSerial,
+  OSCBridge *bridge,
+  OSCLogger *logger
+) {
   this->slipSerial = slipSerial;
+  this->bridge = bridge;
+  this->logger = logger;
+
   if (!sd.begin(SdioConfig(FIFO_SDIO))) {
     logger->error("SD card initialization failed.");
   }
 }
 
 /**
- * Open a file for reading
+ * Read and send a file from the SD card with an accompanying message.
  */
-bool SerialFileTransfer::startReadFile(char *fileName) {
-  return fileRead.open(fileName, O_READ);
-}
+void SerialFileTransfer::readFile(char *fileName) {
+  if (!fileRead.open(fileName, O_READ)) {
+    logger->error("Couldn't open file.");
+    return;
+  }
 
-/**
- * Read a file and send it to the serial.
- */
-void SerialFileTransfer::readFile() {
-  while (fileRead.available()) slipSerial->write(fileRead.read());  
+  OSCMessage message("/file");
+  message.add(fileName);
+  bridge->sendMessage(message);
+
+  slipSerial->beginPacket();
+  while (fileRead.available()) slipSerial->write(fileRead.read());
+  slipSerial->endPacket();
+  
   fileRead.close();
 }
 
@@ -39,4 +51,9 @@ void SerialFileTransfer::startWriteFile() {
 /**
  * Close the file which has been written to and send a success message.
  */
-void SerialFileTransfer::endWriteFile() { fileWrite.close(); }
+void SerialFileTransfer::endWriteFile() {
+  OSCMessage message("/success/file");
+  message.add(fileWriteName);
+  bridge->sendMessage(message);
+  fileWrite.close();
+}

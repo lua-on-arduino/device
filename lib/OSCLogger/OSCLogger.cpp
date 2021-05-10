@@ -22,15 +22,15 @@ void OSCLogger::sendMessage(OSCMessage &message) {
 const char* OSCLogger::getLogAddress(LogType type, bool raw) {
   return 
     type == LogTypeInfo && raw
-    ? "/log/raw/info"
+    ? "/raw/log/info"
     : type == LogTypeInfo
     ? "/log/info"
     : type == LogTypeWarning && raw
-    ? "/log/raw/warning"
+    ? "/raw/log/warning"
     : type == LogTypeWarning
     ? "/log/warning"
     : type == LogTypeError && raw
-    ? "/log/raw/error"
+    ? "/raw/log/error"
     : type == LogTypeError
     ? "/log/error"
     : "/undefined";

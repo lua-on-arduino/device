@@ -23,7 +23,7 @@ void SerialFileTransfer::readFile(char *fileName) {
     return;
   }
 
-  OSCMessage message("/file");
+  OSCMessage message("/raw/file");
   message.add(fileName);
   bridge->sendMessage(message);
 

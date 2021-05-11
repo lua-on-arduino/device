@@ -17,22 +17,19 @@ void FileTransfer::begin(
 /**
  * Read and send a file from the SD card with an accompanying message.
  */
-void FileTransfer::readFile(char *fileName, uint16_t responseId) {
+bool FileTransfer::readFile(char *fileName, uint16_t responseId) {
   if (!sd.exists(fileName)) {
     bridge->sendResponse(
-      Bridge::ResponseError,
-      responseId, "file doesn't exist"
+      Bridge::ResponseError, responseId, "file doesn't exist"
     );
-    return;
+    return false;
   }
 
   if (!fileRead.open(fileName, O_READ)) {
     bridge->sendResponse(
-      Bridge::ResponseError,
-      responseId,
-      "couldn't open file"
+      Bridge::ResponseError, responseId, "couldn't open file"
     );
-    return;
+    return false;
   }
 
   bridge->sendRawResponse(Bridge::ResponseSuccess, responseId);
@@ -42,6 +39,15 @@ void FileTransfer::readFile(char *fileName, uint16_t responseId) {
   slipSerial->endPacket();
   
   fileRead.close();
+  return true;
+}
+
+void FileTransfer::deleteFile(char *fileName, uint16_t responseId) {
+  if (sd.remove(fileName)) {
+    bridge->sendResponse(Bridge::ResponseSuccess, responseId);
+  } else {
+    bridge->sendResponse(Bridge::ResponseError, responseId);
+  }
 }
 
 /**
@@ -52,11 +58,24 @@ void FileTransfer::write(uint8_t b) { fileWrite.write(b); }
 /**
  * Open and empty a file on the SD card for writing.
  */
-void FileTransfer::startWriteFile(char* fileName, uint16_t responseId) {
+void FileTransfer::startWriteFile(
+  char *dirName,
+  char* baseName,
+  uint16_t responseId
+) {
   writeResponseId = responseId;
+
+  // Make sure the directory exists and create all missing parent directories
+  // if necessary.
+  sd.mkdir(dirName, true);
+  sd.chdir(dirName);
+
   // Always override old content with new content.
-  if (sd.exists(fileName)) sd.remove(fileName);
-  fileWrite = sd.open(fileName, FILE_WRITE);
+  if (sd.exists(baseName)) sd.remove(baseName);
+  fileWrite = sd.open(baseName, FILE_WRITE);
+
+  // Switch back to root.
+  sd.chdir();
 
   if (!fileWrite) {
     bridge->sendResponse(Bridge::ResponseError, writeResponseId);
@@ -71,6 +90,22 @@ void FileTransfer::endWriteFile() {
     bridge->sendResponse(Bridge::ResponseSuccess, writeResponseId);
   }
   fileWrite.close();
+}
+
+void FileTransfer::createDirectory(const char *dirName, uint16_t responseId) {
+  if (sd.mkdir(dirName, true)) {
+    bridge->sendResponse(Bridge::ResponseSuccess, responseId);
+  } else {
+    bridge->sendResponse(Bridge::ResponseError, responseId);
+  }
+}
+
+void FileTransfer::deleteDirectory(const char *dirName, uint16_t responseId) {
+  if (sd.rmdir(dirName)) {
+    bridge->sendResponse(Bridge::ResponseSuccess, responseId);
+  } else {
+    bridge->sendResponse(Bridge::ResponseError, responseId);
+  }
 }
 
 void FileTransfer::listDirectoryRecursive(File dir) {

@@ -22,12 +22,15 @@ public:
 
   void begin(SLIPSerial *slipSerial, Bridge *bridge, Logger *logger);
 
-  void readFile(char *fileName, uint16_t responseId);
   void write(uint8_t b);
-  void startWriteFile(char *fileName, uint16_t responseId);
+  bool readFile(char *fileName, uint16_t responseId);
+  void deleteFile(char *fileName, uint16_t responseId);
+  void startWriteFile(char *dirName, char *baseName, uint16_t responseId);
   void endWriteFile();
 
   void listDirectory(const char *dirName, uint16_t responseId);
+  void createDirectory(const char *dirName, uint16_t responseId);
+  void deleteDirectory(const char *dirName, uint16_t responseId);
 };
 
 #endif

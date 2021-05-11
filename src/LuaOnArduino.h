@@ -4,20 +4,19 @@
 #include <SLIPSerial.h>
 #include <OSCMessage.h>
 #include <OSCBundle.h>
-#include <OSCLogger.h>
-#include <OSCBridge.h>
-#include <SerialFileTransfer.h>
+#include <Logger.h>
+#include <Bridge.h>
+#include <FileTransfer.h>
 #include <LuaWrapper.h>
 
 class LuaOnArduino {
 public:
   SLIPSerial* slipSerial;
-  OSCLogger logger;
-  OSCBridge bridge;
+  Logger logger;
+  Bridge bridge;
+  FileTransfer fileTransfer;
   Lua lua;
-
-private:
-  SerialFileTransfer fileTransfer;
+  static const uint16_t maxFileNameLength = 256;
 
 public:
   LuaOnArduino(SLIPSerial *slipSerial);

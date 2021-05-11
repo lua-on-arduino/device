@@ -5,11 +5,16 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 
-class OSCBridge {
+class Bridge {
 public:
   enum ReadSerialMode {
     ReadSerialModeOSC,
     ReadSerialModeRaw
+  };
+
+  enum ResponseType {
+    ResponseSuccess,
+    ResponseError
   };
   
 private:
@@ -27,12 +32,18 @@ private:
   void handleOscInput(OSCBundle &oscInput);
   void handleRawInput(uint8_t c);
   void handleRawInputEnd();
+  const char* getResponseAddress(ResponseType type, bool raw);
 public:
   void begin(SLIPSerial *slipSerial);
-  void sendMessage(OSCMessage &message);
-  void sendRaw();
-  void setReadSerialMode(ReadSerialMode mode);
   void update();
+
+  void sendRaw();
+  void sendMessage(OSCMessage &message);
+  void sendResponse(ResponseType type, uint16_t responseId);
+  void sendResponse(ResponseType type, uint16_t responseId, const char *text);
+  void sendRawResponse(ResponseType type, uint16_t responseId);
+
+  void setReadSerialMode(ReadSerialMode mode);
 
   void onOscInput(OscInputHandler handler);
   void onRawInput(RawInputHandler handler);

@@ -38,24 +38,25 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
   if (oscInput.hasError()) return;
 
   static LuaOnArduino* that = this;
-  static const uint16_t fileNameLength = that->fileTransfer.fileNameLength;
-  static char fileName[fileNameLength];
+  static char fileName[maxFileNameLength];
 
   oscInput.dispatch("/read-file", [](OSCMessage &message) {
-    message.getString(0, fileName, fileNameLength);
-    that->fileTransfer.readFile(fileName);
+    uint16_t responseId = message.getInt(0);
+    message.getString(1, fileName, maxFileNameLength);
+    that->fileTransfer.readFile(fileName, responseId);
   });
 
-  oscInput.dispatch("/file", [](OSCMessage &message) {
-    message.getString(0, that->fileTransfer.fileWriteName, fileNameLength);
+  oscInput.dispatch("/write-file", [](OSCMessage &message) {
+    uint16_t responseId = message.getInt(0);
+    message.getString(1, fileName, maxFileNameLength);
     // Start reading tha raw serial input. The readSerialMode is switched back
     // to OSC mode as soon as the raw slip packet ends.
-    that->bridge.setReadSerialMode(OSCBridge::ReadSerialModeRaw);
-    that->fileTransfer.startWriteFile();
+    that->bridge.setReadSerialMode(Bridge::ReadSerialModeRaw);
+    that->fileTransfer.startWriteFile(fileName, responseId);
   });
 
   oscInput.dispatch("/lua/execute-file", [](OSCMessage &message) {
-    message.getString(0, fileName, fileNameLength);
+    message.getString(0, fileName, maxFileNameLength);
     
     if (that->lua.executeFile(fileName)) {
       OSCMessage message("/success/lua/execute-file");
@@ -63,5 +64,11 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
     } else {
       that->logger.error("Couldn't execute lua file");
     }
+  });
+
+  oscInput.dispatch("/list-dir", [](OSCMessage &message) {
+    uint16_t responseId = message.getInt(0);
+    message.getString(1, fileName, maxFileNameLength);
+    that->fileTransfer.listDirectory(fileName, responseId);
   });
 }

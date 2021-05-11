@@ -6,7 +6,7 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 
-class OSCLogger {
+class Logger {
 public:
   SLIPSerial *slipSerial;
 

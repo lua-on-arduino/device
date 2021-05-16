@@ -19,14 +19,6 @@ namespace FileTransferTests {
     fileTransfer.sd.remove("pio-test/test.lua");
   }
 
-  void FileTransfer_readFile() {
-    File file;
-    file.open("pio-test/test.lua");
-    file.close();
-    TEST_ASSERT_TRUE(fileTransfer.readFile("pio-test/test.lua", 0));
-    fileTransfer.sd.remove("pio-test/test.lua");
-  }
-
   void setUp() {
     bridge.begin(&slipSerial);
     logger.begin(&slipSerial);
@@ -36,7 +28,6 @@ namespace FileTransferTests {
 
   void run() {
     RUN_TEST(FileTransfer_writeFile);
-    RUN_TEST(FileTransfer_readFile);
   }
 }
 

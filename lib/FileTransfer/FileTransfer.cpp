@@ -17,7 +17,7 @@ void FileTransfer::begin(
 /**
  * Read and send a file from the SD card with an accompanying message.
  */
-bool FileTransfer::readFile(char *fileName, uint16_t responseId) {
+bool FileTransfer::readFile(const char *fileName, uint16_t responseId) {
   if (!sd.exists(fileName)) {
     bridge->sendResponse(
       Bridge::ResponseError, responseId, "file doesn't exist"
@@ -42,7 +42,7 @@ bool FileTransfer::readFile(char *fileName, uint16_t responseId) {
   return true;
 }
 
-void FileTransfer::deleteFile(char *fileName, uint16_t responseId) {
+void FileTransfer::deleteFile(const char *fileName, uint16_t responseId) {
   if (sd.remove(fileName)) {
     bridge->sendResponse(Bridge::ResponseSuccess, responseId);
   } else {
@@ -59,8 +59,8 @@ void FileTransfer::write(uint8_t b) { fileWrite.write(b); }
  * Open and empty a file on the SD card for writing.
  */
 void FileTransfer::startWriteFile(
-  char *dirName,
-  char* baseName,
+  const char *dirName,
+  const char* baseName,
   uint16_t responseId
 ) {
   writeResponseId = responseId;

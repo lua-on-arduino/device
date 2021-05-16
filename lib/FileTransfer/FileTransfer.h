@@ -23,9 +23,9 @@ public:
   void begin(SLIPSerial *slipSerial, Bridge *bridge, Logger *logger);
 
   void write(uint8_t b);
-  bool readFile(char *fileName, uint16_t responseId);
-  void deleteFile(char *fileName, uint16_t responseId);
-  void startWriteFile(char *dirName, char *baseName, uint16_t responseId);
+  bool readFile(const char *fileName, uint16_t responseId);
+  void deleteFile(const char *fileName, uint16_t responseId);
+  void startWriteFile(const char *dirName, const char *baseName, uint16_t responseId);
   void endWriteFile();
 
   void listDirectory(const char *dirName, uint16_t responseId);

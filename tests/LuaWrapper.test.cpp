@@ -11,9 +11,9 @@ namespace LuaWrapperTests {
     return 0;
   }
 
-  void Lua_execute() {
+  void Lua_run() {
     lua.reset();
-    TEST_ASSERT_EQUAL(true, lua.execute("testValue = 10"));
+    TEST_ASSERT_EQUAL(true, lua.run("testValue = 10"));
     lua_getglobal(lua.L, "testValue");
     TEST_ASSERT_EQUAL(10, lua_tonumber(lua.L, -1));
   }
@@ -83,7 +83,7 @@ namespace LuaWrapperTests {
   }
 
   void run() {
-    RUN_TEST(Lua_execute);
+    RUN_TEST(Lua_run);
     RUN_TEST(Lua_registerFunction);
     RUN_TEST(Lua_registerLibrary);
     RUN_TEST(Lua_getFunction);

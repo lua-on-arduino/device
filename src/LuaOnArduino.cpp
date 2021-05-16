@@ -84,14 +84,14 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
     that->fileTransfer.listDirectory(dirName, responseId);
   });  
 
-  oscInput.dispatch("/lua/execute-file", [](OSCMessage &message) {
-    message.getString(0, fileName, maxFileNameLength);
+  oscInput.dispatch("/lua/run-file", [](OSCMessage &message) {
+    uint16_t responseId = message.getInt(0);
+    message.getString(1, fileName, maxFileNameLength);
     
-    if (that->lua.executeFile(fileName)) {
-      OSCMessage message("/success/lua/execute-file");
-      that->bridge.sendMessage(message);
+    if (that->lua.runFile(fileName)) {
+      that->bridge.sendResponse(Bridge::ResponseSuccess, responseId);
     } else {
-      that->logger.error("Couldn't execute lua file");
+      that->bridge.sendResponse(Bridge::ResponseError, responseId);
     }
   });
 }

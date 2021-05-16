@@ -22,8 +22,8 @@ public:
   void reset();
 
   bool check(int error);
-  bool execute(const char *string);
-  bool executeFile(const char* fileName);
+  bool run(const char *string);
+  bool runFile(const char* fileName);
 
   void registerFunction(const char *name, const lua_CFunction function);
   void registerLibrary(const char *name, const luaL_reg library[]);

@@ -39,7 +39,7 @@ void Lua::registerPolyfills() {
   registerFunction("loadfile", [](lua_State* L) {
     return that->luaLoadFile(L);
   });
-  execute(
+  run(
     "_LOADED = {}\n"
     "function require(moduleName)\n"
     "  if _LOADED[moduleName] == nil then\n"
@@ -68,16 +68,16 @@ bool Lua::check(int luaHasError) {
 }
 
 /**
- * Execute a lua string.
+ * Run a lua string.
  */
-bool Lua::execute(const char *string) {
+bool Lua::run(const char *string) {
   return check(luaL_dostring(L, string));
 }
 
 /**
- * Execute a lua file.
+ * Run a lua file.
  */
-bool Lua::executeFile(const char* fileName) {
+bool Lua::runFile(const char* fileName) {
   return check(luaL_dofile(L, fileName));
 }
 

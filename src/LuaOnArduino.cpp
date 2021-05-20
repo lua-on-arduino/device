@@ -30,12 +30,19 @@ void LuaOnArduino::begin() {
   lua.onErrorBegin([]() { that->logger.errorBegin(); });
   lua.onErrorEnd([]() { that->logger.logEnd(); });
 
-  // Install cpp libraries.
+  setupLuaFirmware();
+}
+
+void LuaOnArduino::reset(bool runEntry) {
+  lua.reset();
+  setupLuaFirmware();
+  if (runEntry) lua.runFile("lua/init.lua");
+}
+
+void LuaOnArduino::setupLuaFirmware() {
   LuaLogLibrary::install(&lua, &logger);
   LuaHmrLibrary::install(&lua);
-
-  // Install loa's lua firmware.
-  // lua.runFile("loa_firmware/init.lua");
+  lua.runFile("lua/loa_firmware/init.lua");
 }
 
 void LuaOnArduino::update() { bridge.update(); }
@@ -109,7 +116,9 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
     uint16_t responseId = message.getInt(0);
     message.getString(1, fileName, maxFileNameLength);
 
-    const char *updateType = LuaHmrLibrary::updateFile(fileName);
-    that->bridge.sendResponse(Bridge::ResponseSuccess, responseId, updateType);
+    bool usedHmr = LuaHmrLibrary::updateFile(fileName);
+    if (!usedHmr) that->reset(true);
+
+    that->bridge.sendResponse(Bridge::ResponseSuccess, responseId, (int)usedHmr);
   });
 }

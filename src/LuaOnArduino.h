@@ -10,6 +10,8 @@
 #include <LuaWrapper.h>
 
 class LuaOnArduino {
+private:
+  void setupLuaFirmware();
 public:
   SLIPSerial* slipSerial;
   Logger logger;
@@ -18,11 +20,10 @@ public:
   Lua lua;
   static const uint16_t maxFileNameLength = 256;
 
-public:
   LuaOnArduino(SLIPSerial *slipSerial);
-
   void handleOscInput(OSCBundle &oscInput);
   void begin();
+  void reset(bool runEntry = false);
   void update();
 };
 

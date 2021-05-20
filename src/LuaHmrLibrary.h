@@ -6,21 +6,20 @@
 namespace LuaHmrLibrary {
   Lua *lua;
 
-  const char* updateFile(const char *modulePath) {
-    if (strcmp(modulePath, "lua/loa_firmware/init.lua") == 0) {
-      lua->runFile(modulePath);
-      return "reload";
-    } else if (lua->getFunction("HMR", "update")) {
+  bool updateFile(const char *modulePath) {
+    const char *entry = "lua/init.lua";
+    bool moduleIsEntry = strcmp(modulePath, entry) == 0;
+    bool usedHmr = false;
+
+    if (!moduleIsEntry && lua->getFunction("HMR", "update")) {
       lua->push(modulePath);
       lua->call(1, 1);
 
-      const char* updateType = lua_tostring(lua->L, -1);
+      usedHmr = lua_toboolean(lua->L, -1);
       lua_pop(lua->L, 1);
-
-      return updateType;
-    } else {
-      return "error";
     }
+
+    return usedHmr;
   }
 
   void install(Lua *lua) {

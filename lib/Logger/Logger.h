@@ -13,11 +13,13 @@ public:
   enum LogType {
     LogTypeInfo,
     LogTypeWarning,
-    LogTypeError
+    LogTypeError,
+    LogTypeDump
   };
 
   void begin(SLIPSerial *slipSerial);
 
+  void log(LogType type, const char* text);
   void info(const char* text);
   void warning(const char* text);
   void error(const char* text);
@@ -33,7 +35,6 @@ public:
 
 private:
   void sendMessage(OSCMessage &message);
-  void log(LogType type, const char* text);
   const char* getLogAddress(LogType type, bool raw);
 };
 

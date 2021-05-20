@@ -33,6 +33,10 @@ const char* Logger::getLogAddress(LogType type, bool raw) {
     ? "/raw/log/error"
     : type == LogTypeError
     ? "/log/error"
+    : type == LogTypeDump && raw
+    ? "/raw/log/dump"
+    : type == LogTypeDump
+    ? "/log/dump"
     : "/undefined";
 }
 
@@ -66,10 +70,11 @@ void Logger::error(const char* text) {
   log(LogTypeError, text);
 }
 
+/**
+ * Send an OSC "/log/dump" message.
+ */
 void Logger::dump(const char* text) {
-  OSCMessage message("/dump");
-  message.add(text);
-  sendMessage(message);
+  log(LogTypeDump, text);
 }
 
 void Logger::logBegin(LogType type) {

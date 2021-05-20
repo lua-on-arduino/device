@@ -8,31 +8,14 @@ namespace LuaLogLibrary {
   Lua *lua;
   Logger *logger;
 
-  int _dump(lua_State *L) {
-    const char* text = lua_tostring(L, 1);
-    logger->dump(text);
+  int _log(lua_State *L) {
+    auto type = static_cast<Logger::LogType>(lua_tointeger(L, -2) - 1);
+    const char *text = lua_tostring(L, -1);
+    logger->log(type, text);
     return 0;
   }
 
-  int error(lua_State *L) {
-    const char* text = lua_tostring(L, 1);
-    logger->error(text);
-    return 0;
-  }
-
-  int warning(lua_State *L) {
-    const char* text = lua_tostring(L, 1);
-    logger->warning(text);
-    return 0;
-  }
-
-  int info(lua_State *L) {
-    const char* text = lua_tostring(L, 1);
-    logger->info(text);
-    return 0;
-  }
-
-  int flush(lua_State *L) {
+  int _flush(lua_State *L) {
     logger->flush();
     return 0;
   }
@@ -42,11 +25,8 @@ namespace LuaLogLibrary {
     LuaLogLibrary::logger = logger;
 
     luaL_Reg library[] = {
-      { "error", error },
-      { "warning", warning },
-      { "info", info },
-      { "flush", flush },
-      { "_dump", _dump },
+      { "_log", _log },
+      { "_flush", _flush },
       { NULL, NULL }
     };
 

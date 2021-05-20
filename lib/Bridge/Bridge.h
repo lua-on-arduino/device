@@ -39,9 +39,10 @@ public:
 
   void sendRaw();
   void sendMessage(OSCMessage &message);
-  void sendResponse(ResponseType type, uint16_t responseId);
-  void sendResponse(ResponseType type, uint16_t responseId, const char *text);
   void sendRawResponse(ResponseType type, uint16_t responseId);
+  void sendResponse(ResponseType type, uint16_t responseId);
+  template <typename T>
+  void sendResponse(ResponseType type, uint16_t responseId, T argument);
 
   void setReadSerialMode(ReadSerialMode mode);
 
@@ -49,5 +50,13 @@ public:
   void onRawInput(RawInputHandler handler);
   void onRawInputEnd(RawInputEndHandler handler);
 };
+
+template <typename T>
+void Bridge::sendResponse(ResponseType type, uint16_t responseId, T argument) {
+  OSCMessage message(getResponseAddress(type, false));
+  message.add(responseId);
+  message.add(argument);
+  sendMessage(message);
+}
 
 #endif

@@ -22,13 +22,6 @@ void Bridge::sendResponse(ResponseType type, uint16_t responseId) {
   sendMessage(message);
 }
 
-void Bridge::sendResponse(ResponseType type, uint16_t responseId, const char * text) {
-  OSCMessage message(getResponseAddress(type, false));
-  message.add(responseId);
-  message.add(text);
-  sendMessage(message);
-}
-
 void Bridge::sendRawResponse(ResponseType type, uint16_t responseId) {
   OSCMessage message(getResponseAddress(type, true));
   message.add(responseId);

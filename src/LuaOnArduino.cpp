@@ -1,5 +1,8 @@
 #include <LuaOnArduino.h>
 
+#include <LuaLogLibrary.h>
+#include <LuaHmrLibrary.h>
+
 LuaOnArduino::LuaOnArduino(SLIPSerial *slipSerial) {
   this->slipSerial = slipSerial;
 }
@@ -26,6 +29,13 @@ void LuaOnArduino::begin() {
 
   lua.onErrorBegin([]() { that->logger.errorBegin(); });
   lua.onErrorEnd([]() { that->logger.logEnd(); });
+
+  // Install cpp libraries.
+  LuaLogLibrary::install(&lua, &logger);
+  LuaHmrLibrary::install(&lua);
+
+  // Install loa's lua firmware.
+  // lua.runFile("loa_firmware/init.lua");
 }
 
 void LuaOnArduino::update() { bridge.update(); }
@@ -82,7 +92,7 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
     uint16_t responseId = message.getInt(0);
     message.getString(1, dirName, maxFileNameLength);
     that->fileTransfer.listDirectory(dirName, responseId);
-  });  
+  });
 
   oscInput.dispatch("/lua/run-file", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
@@ -93,5 +103,13 @@ void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
     } else {
       that->bridge.sendResponse(Bridge::ResponseError, responseId);
     }
+  });
+
+  oscInput.dispatch("/lua/update-file", [](OSCMessage &message) {
+    uint16_t responseId = message.getInt(0);
+    message.getString(1, fileName, maxFileNameLength);
+
+    const char *updateType = LuaHmrLibrary::updateFile(fileName);
+    that->bridge.sendResponse(Bridge::ResponseSuccess, responseId, updateType);
   });
 }

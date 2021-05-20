@@ -90,12 +90,12 @@ void Bridge::update() {
         }
       }
     }
-  }
 
-  if (readSerialMode == ReadSerialModeOSC) {
-    handleOscInput(oscInput);
-  } else if (readSerialMode == ReadSerialModeRaw) {
-    handleRawInputEnd();
-    readSerialMode = ReadSerialModeOSC;
+    if (readSerialMode == ReadSerialModeOSC) {
+      handleOscInput(oscInput);
+    } else if (readSerialMode == ReadSerialModeRaw) {
+      handleRawInputEnd();
+      setReadSerialMode(ReadSerialModeOSC);
+    }
   }
 }

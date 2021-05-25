@@ -6,6 +6,9 @@
     "type": "git",
     "url": "https://github.com/lua-on-arduino/arduino"
   },
+  "authors": {
+    "name": "arnoson"
+  },
   "license": "MIT",
   "dependencies": {
     "greiman/SdFat": "^2.0.6",

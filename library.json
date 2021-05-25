@@ -11,5 +11,6 @@
     "greiman/SdFat": "^2.0.6",
     "cnmat/OSC": "0.0.0-alpha+sha.41b44981e3"
   },
-  "frameworks": ["teensy"]
+  "frameworks":  "*",
+  "platforms": "*"
 }

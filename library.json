@@ -1,0 +1,18 @@
+{
+  "name": "lua-on-arduino",
+  "version": "0.0.1",
+  "keywords": "lua, scripting, hmr",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lua-on-arduino/arduino"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "greiman/SdFat": "^2.0.6",
+    "cnmat/OSC": "0.0.0-alpha+sha.41b44981e3"
+  },
+  "export": {
+    "exclude": ["test", "tests"]
+  },
+  "frameworks": ["teensy"]
+}

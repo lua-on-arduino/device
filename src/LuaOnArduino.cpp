@@ -15,7 +15,7 @@ void LuaOnArduino::begin() {
 
   static LuaOnArduino *that = this;
 
-  bridge.onOscInput([](OSCBundle &oscInput) {
+  bridge.onOscInput([](OSCMessage &oscInput) {
     that->handleOscInput(oscInput);
   });
 
@@ -31,11 +31,14 @@ void LuaOnArduino::begin() {
   lua.onErrorEnd([]() { that->logger.logEnd(); });
 
   setupLuaFirmware();
+  if (customInstaller != NULL) customInstaller();
 }
 
 void LuaOnArduino::reset(bool runEntry) {
+  if (handleReset != NULL) handleReset();
   lua.reset();
   setupLuaFirmware();
+  if (customInstaller != NULL) customInstaller();
   if (runEntry) lua.runFile("lua/init.lua");
 }
 
@@ -45,13 +48,21 @@ void LuaOnArduino::setupLuaFirmware() {
   lua.runFile("lua/loa_firmware/init.lua");
 }
 
+void LuaOnArduino::onInstall(CustomInstaller installer) {
+  customInstaller = installer;
+}
+
+void LuaOnArduino::beforeReset(ResetHandler handler) {
+  handleReset = handler;
+}
+
 void LuaOnArduino::update() { bridge.update(); }
 
 
 /**
  * Dispatch incoming OSC messages.
  */
-void LuaOnArduino::handleOscInput(OSCBundle &oscInput) {
+void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
   if (oscInput.hasError()) return;
 
   static LuaOnArduino* that = this;

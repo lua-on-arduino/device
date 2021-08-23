@@ -28,7 +28,7 @@ void Bridge::sendRawResponse(ResponseType type, uint16_t responseId) {
   sendMessage(message);
 }
 
-void Bridge::handleOscInput(OSCBundle &oscInput) {
+void Bridge::handleOscInput(OSCMessage &oscInput) {
   if (oscInputHandler != NULL) oscInputHandler(oscInput);
 }
 
@@ -77,7 +77,7 @@ const char* Bridge::getResponseAddress(ResponseType type, bool raw) {
  * the received data as an OSC input or a file.
  */
 void Bridge::update() {
-  OSCBundle oscInput;
+  OSCMessage oscInput;
 
   if (slipSerial->available()) {
     while (!slipSerial->endOfPacket()) {

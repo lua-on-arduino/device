@@ -20,7 +20,7 @@ public:
 private:
   SLIPSerial *slipSerial;
 
-  typedef void (*OscInputHandler)(OSCBundle &oscInput);
+  typedef void (*OscInputHandler)(OSCMessage &oscInput);
   typedef void (*RawInputHandler)(uint8_t c);
   typedef void (*RawInputEndHandler)();
 
@@ -29,7 +29,7 @@ private:
   RawInputHandler rawInputHandler;
   RawInputEndHandler rawInputEndHandler;
 
-  void handleOscInput(OSCBundle &oscInput);
+  void handleOscInput(OSCMessage &oscInput);
   void handleRawInput(uint8_t c);
   void handleRawInputEnd();
   const char* getResponseAddress(ResponseType type, bool raw);

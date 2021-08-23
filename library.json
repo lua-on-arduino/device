@@ -4,7 +4,7 @@
   "keywords": "lua, scripting, hmr",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lua-on-arduino/arduino"
+    "url": "https://github.com/lua-on-arduino/device"
   },
   "authors": {
     "name": "arnoson"

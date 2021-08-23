@@ -7,6 +7,11 @@
 #include <Bridge.h>
 #include <Logger.h>
 
+// Todo: make this work for all arduinos, this is only a quick and dirty
+// workaround for the teensy.
+// See: https://github.com/greiman/SdFat/issues/291#issuecomment-903292293
+typedef FsFile File;
+
 class FileTransfer {
 private:
   uint16_t writeResponseId;

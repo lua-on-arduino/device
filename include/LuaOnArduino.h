@@ -11,6 +11,10 @@
 
 class LuaOnArduino {
 private:
+  typedef void (*CustomInstaller)();
+  typedef void (*ResetHandler)();
+  CustomInstaller customInstaller;
+  ResetHandler handleReset;
   void setupLuaFirmware();
 public:
   SLIPSerial* slipSerial;
@@ -21,10 +25,13 @@ public:
   static const uint16_t maxFileNameLength = 256;
 
   LuaOnArduino(SLIPSerial *slipSerial);
-  void handleOscInput(OSCBundle &oscInput);
+  void handleOscInput(OSCMessage &oscInput);
   void begin();
   void reset(bool runEntry = false);
   void update();
+
+  void onInstall(CustomInstaller installer);
+  void beforeReset(ResetHandler handler);
 };
 
 #endif

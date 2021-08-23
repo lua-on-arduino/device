@@ -2,6 +2,7 @@
 #define SLIPSerial_h
 
 #include <Arduino.h>
+#include <SPI.h>
 #include <Stream.h>
 #include <usb_serial.h>
 

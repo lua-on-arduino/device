@@ -13,8 +13,12 @@ class LuaOnArduino {
 private:
   typedef void (*CustomInstaller)();
   typedef void (*ResetHandler)();
+  typedef void (*OscInputHandler)(OSCMessage &oscInput);
+
   CustomInstaller customInstaller;
   ResetHandler handleReset;
+  OscInputHandler oscInputHandler;
+
   void setupLuaFirmware();
 public:
   SLIPSerial* slipSerial;
@@ -32,6 +36,7 @@ public:
 
   void onInstall(CustomInstaller installer);
   void beforeReset(ResetHandler handler);
+  void onOscInput(OscInputHandler handler);
 };
 
 #endif

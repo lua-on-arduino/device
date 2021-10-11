@@ -4,6 +4,7 @@
 #include <SLIPSerial.h>
 #include <OSCMessage.h>
 #include <OSCBundle.h>
+#include <Logger.h>
 
 class Bridge {
 public:
@@ -19,6 +20,7 @@ public:
   
 private:
   SLIPSerial *slipSerial;
+  Logger *logger;
 
   typedef void (*OscInputHandler)(OSCMessage &oscInput);
   typedef void (*RawInputHandler)(uint8_t c);
@@ -34,7 +36,7 @@ private:
   void handleRawInputEnd();
   const char* getResponseAddress(ResponseType type, bool raw);
 public:
-  void begin(SLIPSerial *slipSerial);
+  void begin(SLIPSerial *slipSerial, Logger *logger);
   void update();
 
   void sendRaw();

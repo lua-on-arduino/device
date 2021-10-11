@@ -1,7 +1,8 @@
 #include <Bridge.h>
 
-void Bridge::begin(SLIPSerial *slipSerial) {
+void Bridge::begin(SLIPSerial *slipSerial, Logger *logger) {
   this->slipSerial = slipSerial;
+  this->logger = logger;
 }
 
 /**
@@ -92,7 +93,11 @@ void Bridge::update() {
     }
 
     if (readSerialMode == ReadSerialModeOSC) {
-      handleOscInput(oscInput);
+      if (oscInput.hasError()) {
+        logger->error("OSC input has error.");
+      } else {
+        handleOscInput(oscInput);
+      }
     } else if (readSerialMode == ReadSerialModeRaw) {
       handleRawInputEnd();
       setReadSerialMode(ReadSerialModeOSC);

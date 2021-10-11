@@ -9,7 +9,7 @@ LuaOnArduino::LuaOnArduino(SLIPSerial *slipSerial) {
 
 void LuaOnArduino::begin() {
   logger.begin(slipSerial);
-  bridge.begin(slipSerial);
+  bridge.begin(slipSerial, &logger);
   lua.begin(slipSerial);
   fileTransfer.begin(slipSerial, &bridge, &logger);
 
@@ -17,6 +17,7 @@ void LuaOnArduino::begin() {
 
   bridge.onOscInput([](OSCMessage &oscInput) {
     that->handleOscInput(oscInput);
+    if (that->oscInputHandler != NULL) that->oscInputHandler(oscInput);
   });
 
   bridge.onRawInput([](uint8_t c) {
@@ -56,6 +57,10 @@ void LuaOnArduino::beforeReset(ResetHandler handler) {
   handleReset = handler;
 }
 
+void LuaOnArduino::onOscInput(OscInputHandler handler) {
+  oscInputHandler = handler;
+}
+
 void LuaOnArduino::update() { bridge.update(); }
 
 
@@ -63,8 +68,6 @@ void LuaOnArduino::update() { bridge.update(); }
  * Dispatch incoming OSC messages.
  */
 void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
-  if (oscInput.hasError()) return;
-
   static LuaOnArduino* that = this;
   static char dirName[maxFileNameLength];
   static char fileName[maxFileNameLength];

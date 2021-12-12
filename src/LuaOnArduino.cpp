@@ -74,6 +74,12 @@ void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
 
   oscInput.dispatch("/read-file", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, fileName, maxFileNameLength);
     that->fileTransfer.readFile(fileName, responseId);
   });
@@ -81,8 +87,12 @@ void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
   oscInput.dispatch("/write-file", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
 
+    if (!message.isString(1) || !message.isString(2)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong arguments");
+      return;
+    }
+
     message.getString(1, dirName, maxFileNameLength);
-    // This is the file name without directory.
     message.getString(2, fileName, maxFileNameLength);
 
     // Start reading the raw serial input. The readSerialMode is switched back
@@ -93,30 +103,60 @@ void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
 
   oscInput.dispatch("/delete-file", [](OSCMessage &message){
     uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, fileName, maxFileNameLength);
     that->fileTransfer.deleteFile(fileName, responseId);
   });
 
   oscInput.dispatch("/create-dir", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, dirName, maxFileNameLength);
     that->fileTransfer.createDirectory(dirName, responseId);
   });
 
   oscInput.dispatch("/delete-dir", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+    
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, dirName, maxFileNameLength);
     that->fileTransfer.deleteDirectory(dirName, responseId);
   });     
 
   oscInput.dispatch("/list-dir", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, dirName, maxFileNameLength);
     that->fileTransfer.listDirectory(dirName, responseId);
   });
 
   oscInput.dispatch("/lua/run-file", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, fileName, maxFileNameLength);
     
     if (that->lua.runFile(fileName)) {
@@ -128,6 +168,13 @@ void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
 
   oscInput.dispatch("/lua/update-file", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
+
+
+    if (!message.isString(1)){
+      that->bridge.sendResponse(Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
     message.getString(1, fileName, maxFileNameLength);
 
     bool usedHmr = LuaHmrLibrary::updateFile(fileName);

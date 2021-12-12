@@ -12,7 +12,7 @@ public:
 
   enum LogType {
     LogTypeInfo,
-    LogTypeWarning,
+    LogTypeWarn,
     LogTypeError,
     LogTypeDump
   };
@@ -21,14 +21,14 @@ public:
 
   void log(LogType type, const char* text);
   void info(const char* text);
-  void warning(const char* text);
+  void warn(const char* text);
   void error(const char* text);
   void dump(const char* text);
 
   void logBegin(LogType type);
   void logEnd();
   void errorBegin();
-  void warningBegin();
+  void warnBegin();
   void infoBegin();
 
   void flush();

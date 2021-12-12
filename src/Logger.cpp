@@ -25,10 +25,10 @@ const char* Logger::getLogAddress(LogType type, bool raw) {
     ? "/raw/log/info"
     : type == LogTypeInfo
     ? "/log/info"
-    : type == LogTypeWarning && raw
-    ? "/raw/log/warning"
-    : type == LogTypeWarning
-    ? "/log/warning"
+    : type == LogTypeWarn && raw
+    ? "/raw/log/warn"
+    : type == LogTypeWarn
+    ? "/log/warn"
     : type == LogTypeError && raw
     ? "/raw/log/error"
     : type == LogTypeError
@@ -57,10 +57,10 @@ void Logger::info(const char* text) {
 }
 
 /**
- * Send an OSC "/log/warning" message.
+ * Send an OSC "/log/warn" message.
  */
-void Logger::warning(const char* text) {
-  log(LogTypeWarning, text);
+void Logger::warn(const char* text) {
+  log(LogTypeWarn, text);
 }
 
 /**
@@ -84,7 +84,7 @@ void Logger::logBegin(LogType type) {
 }
 
 void Logger::errorBegin() { logBegin(Logger::LogTypeError); }
-void Logger::warningBegin() { logBegin(Logger::LogTypeWarning); }
+void Logger::warnBegin() { logBegin(Logger::LogTypeWarn); }
 void Logger::infoBegin() { logBegin(Logger::LogTypeInfo); }
 void Logger::logEnd() { flush(); }
 

@@ -109,6 +109,23 @@ void LuaOnArduino::handleOscInput(OSCMessage &oscInput) {
     that->fileTransfer.deleteFile(fileName, responseId);
   });
 
+  oscInput.dispatch("/rename-file", [](OSCMessage &message) {
+    uint16_t responseId = message.getInt(0);
+
+    if (!message.isString(1) || !message.isString(2)) {
+      that->bridge.sendResponse(
+          Bridge::ResponseError, responseId, "Wrong argument");
+      return;
+    }
+
+    // We're using `dirName` and `fileName` here, but actually this are two
+    // file names...
+    message.getString(1, dirName, maxFileNameLength);  // Old file name
+    message.getString(2, fileName, maxFileNameLength); // New file name
+
+    that->fileTransfer.renameFile(dirName, fileName, responseId);
+  });
+
   oscInput.dispatch("/create-dir", [](OSCMessage &message) {
     uint16_t responseId = message.getInt(0);
 

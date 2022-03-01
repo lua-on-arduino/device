@@ -1,12 +1,12 @@
 #ifndef LuaWrapper_h
 #define LuaWrapper_h
 
-#include <Arduino.h>
-#include <SPI.h>
-#include <sdios.h>
 #include "lua/lauxlib.h"
 #include "lua/lua.h"
 #include "lua/lualib.h"
+#include <Arduino.h>
+#include <SPI.h>
+#include <sdios.h>
 
 class Lua {
 public:
@@ -15,15 +15,15 @@ public:
   Callback handleErrorEnd;
 
   Stream *serial;
-  lua_State *L;  
+  lua_State *L;
 
   ~Lua();
-  void begin(Stream* serial);
+  void begin(Stream *serial);
   void reset();
 
   bool check(int error);
   bool run(const char *string);
-  bool runFile(const char* fileName);
+  bool runFile(const char *fileName);
 
   void registerFunction(const char *name, const lua_CFunction function);
   void registerLibrary(const char *name, const luaL_reg library[]);
@@ -36,7 +36,7 @@ public:
   void push(lua_Number number);
   void push(const char *string);
   bool call(byte argsCount, byte resultsCount);
-  
+
   void onErrorBegin(Callback handler) { handleErrorBegin = handler; }
   void onErrorEnd(Callback handler) { handleErrorEnd = handler; }
 
@@ -44,8 +44,12 @@ private:
   void initState();
   int luaLoadFile(lua_State *L);
   void registerPolyfills();
-  void errorBegin() { if (handleErrorBegin != NULL) handleErrorBegin(); }
-  void errorEnd() { if (handleErrorEnd != NULL) handleErrorEnd(); }
+  void errorBegin() {
+    if (handleErrorBegin != NULL) handleErrorBegin();
+  }
+  void errorEnd() {
+    if (handleErrorEnd != NULL) handleErrorEnd();
+  }
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include <LuaWrapper.h>
 
 int Lua::luaLoadFile(lua_State *L) {
-  const char* fileName = lua_tostring(L, 1);
+  const char *fileName = lua_tostring(L, 1);
   check(luaL_loadfile(L, fileName));
   lua_call(L, 0, 1);
   return 1;
@@ -12,7 +12,7 @@ Lua::~Lua() { lua_close(L); }
 /**
  * Create a new lua state and setup libraries
  */
-void Lua::begin(Stream* serial) {
+void Lua::begin(Stream *serial) {
   this->serial = serial;
   initState();
 }
@@ -36,20 +36,17 @@ void Lua::initState() {
 void Lua::registerPolyfills() {
   // Polyfill lua's `require` function.
   static Lua *that = this;
-  registerFunction("loadfile", [](lua_State* L) {
-    return that->luaLoadFile(L);
-  });
-  run(
-    "_LOADED = {}\n"
-    "function require(moduleName)\n"
-    "  if _LOADED[moduleName] == nil then\n"
-    "    local root = 'lua/'\n"
-    "    local path = string.gsub(moduleName, '%.', '/')\n"
-    "    _LOADED[moduleName] = loadfile(root .. path .. '.lua')\n"
-    "  end\n"
-    "  return _LOADED[moduleName]\n"
-    "end\n"
-  );
+  registerFunction(
+      "loadfile", [](lua_State *L) { return that->luaLoadFile(L); });
+  run("_LOADED = {}\n"
+      "function require(moduleName)\n"
+      "  if _LOADED[moduleName] == nil then\n"
+      "    local root = 'lua/'\n"
+      "    local path = string.gsub(moduleName, '%.', '/')\n"
+      "    _LOADED[moduleName] = loadfile(root .. path .. '.lua')\n"
+      "  end\n"
+      "  return _LOADED[moduleName]\n"
+      "end\n");
 }
 
 /**
@@ -57,11 +54,11 @@ void Lua::registerPolyfills() {
  */
 bool Lua::check(int luaHasError) {
   if (luaHasError) {
-    #ifndef UNIT_TEST
-      errorBegin();
-      serial->print(lua_tostring(L, -1));
-      errorEnd();
-    #endif
+#ifndef UNIT_TEST
+    errorBegin();
+    serial->print(lua_tostring(L, -1));
+    errorEnd();
+#endif
     lua_pop(L, 1);
   }
   return luaHasError ? false : true;
@@ -70,14 +67,12 @@ bool Lua::check(int luaHasError) {
 /**
  * Run a lua string.
  */
-bool Lua::run(const char *string) {
-  return check(luaL_dostring(L, string));
-}
+bool Lua::run(const char *string) { return check(luaL_dostring(L, string)); }
 
 /**
  * Run a lua file.
  */
-bool Lua::runFile(const char* fileName) {
+bool Lua::runFile(const char *fileName) {
   return check(luaL_dofile(L, fileName));
 }
 
@@ -103,38 +98,36 @@ bool Lua::getFunction(const char *name, bool logError) {
 
   if (!lua_isfunction(L, -1) && !lua_islightfunction(L, -1)) {
     if (logError) {
-      #ifndef UNIT_TEST
+#ifndef UNIT_TEST
       errorBegin();
       serial->printf(F("Can't find function `%s`."), name);
       errorEnd();
-      #endif
+#endif
     }
     lua_pop(L, 1);
     return false;
   }
 
-  return true;  
+  return true;
 }
 
 /**
  * Push a lua function on the stack and log an error if it doesn't exist.
  */
-bool Lua::getFunction(const char *name) {
-  return getFunction(name, true);
-}
+bool Lua::getFunction(const char *name) { return getFunction(name, true); }
 
 /**
  * Push a lua function in a table on the stack.
- */ 
+ */
 bool Lua::getFunction(const char *table, const char *name, bool logError) {
   lua_getglobal(L, table);
   if (!lua_istable(L, -1)) {
     if (logError) {
-      #ifndef UNIT_TEST
+#ifndef UNIT_TEST
       errorBegin();
       serial->printf(F("Can't find table `%s`."), table);
       errorEnd();
-      #endif
+#endif
     }
     lua_pop(L, 1);
     return false;
@@ -145,11 +138,11 @@ bool Lua::getFunction(const char *table, const char *name, bool logError) {
 
   if (!lua_isfunction(L, -1) && !lua_islightfunction(L, -1)) {
     if (logError) {
-      #ifndef UNIT_TEST
+#ifndef UNIT_TEST
       errorBegin();
       serial->printf(F("Can't find function `%s` in table `%s`."), name, table);
       errorEnd();
-      #endif
+#endif
     }
     lua_pop(L, 1);
     return false;
@@ -160,7 +153,7 @@ bool Lua::getFunction(const char *table, const char *name, bool logError) {
 
 /**
  * Push a lua function in a table on the stack and log an error if the table or
- * the function doesn't exist. 
+ * the function doesn't exist.
  */
 bool Lua::getFunction(const char *table, const char *name) {
   return getFunction(table, name, true);
@@ -178,27 +171,19 @@ bool Lua::call(byte argsCount = 0, byte resultsCount = 0) {
 StdioStream file;
 
 extern "C" {
-  void lua_compat_print(const char *string) {
-    Serial.print(string);
-  }
+void lua_compat_print(const char *string) { Serial.print(string); }
 
-  int lua_compat_fopen(const char *fileName) {
-    return file.fopen(fileName, "r") ? 1 : 0;
-  }
+int lua_compat_fopen(const char *fileName) {
+  return file.fopen(fileName, "r") ? 1 : 0;
+}
 
-  void lua_compat_fclose() {
-    file.fclose();
-  }
+void lua_compat_fclose() { file.fclose(); }
 
-  int lua_compat_feof() {
-    return file.feof();
-  }
+int lua_compat_feof() { return file.feof(); }
 
-  size_t lua_compat_fread(void* ptr, size_t size, size_t count) {
-    return file.fread(ptr, size, count);
-  }
+size_t lua_compat_fread(void *ptr, size_t size, size_t count) {
+  return file.fread(ptr, size, count);
+}
 
-  int lua_compat_ferror() {
-    return file.ferror();
-  }
+int lua_compat_ferror() { return file.ferror(); }
 }

@@ -41,36 +41,25 @@ void Bridge::handleRawInputEnd() {
   if (rawInputEndHandler != NULL) rawInputEndHandler();
 }
 
-void Bridge::onOscInput(OscInputHandler handler) {
-  oscInputHandler = handler;
-}
+void Bridge::onOscInput(OscInputHandler handler) { oscInputHandler = handler; }
 
-void Bridge::onRawInput(RawInputHandler handler) {
-  rawInputHandler = handler;
-}
+void Bridge::onRawInput(RawInputHandler handler) { rawInputHandler = handler; }
 
 void Bridge::onRawInputEnd(RawInputEndHandler handler) {
   rawInputEndHandler = handler;
 }
 
-void Bridge::setReadSerialMode(ReadSerialMode mode) {
-  readSerialMode = mode;
-}
+void Bridge::setReadSerialMode(ReadSerialMode mode) { readSerialMode = mode; }
 
 /**
- * Return the OSC address for a response type. 
+ * Return the OSC address for a response type.
  */
-const char* Bridge::getResponseAddress(ResponseType type, bool raw) {
-  return 
-    type == ResponseSuccess && raw
-    ? "/raw/response/success"
-    : type == ResponseSuccess
-    ? "/response/success"
-    : type == ResponseError && raw
-    ? "/raw/response/error"
-    : type == ResponseError
-    ? "/response/error"
-    : "/undefined";
+const char *Bridge::getResponseAddress(ResponseType type, bool raw) {
+  return type == ResponseSuccess && raw ? "/raw/response/success"
+         : type == ResponseSuccess      ? "/response/success"
+         : type == ResponseError && raw ? "/raw/response/error"
+         : type == ResponseError        ? "/response/error"
+                                        : "/undefined";
 }
 
 /**

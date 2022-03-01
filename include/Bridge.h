@@ -1,23 +1,17 @@
 #ifndef OSCBridge_h
 #define OSCBridge_h
 
-#include <SLIPSerial.h>
-#include <OSCMessage.h>
-#include <OSCBundle.h>
 #include <Logger.h>
+#include <OSCBundle.h>
+#include <OSCMessage.h>
+#include <SLIPSerial.h>
 
 class Bridge {
 public:
-  enum ReadSerialMode {
-    ReadSerialModeOSC,
-    ReadSerialModeRaw
-  };
+  enum ReadSerialMode { ReadSerialModeOSC, ReadSerialModeRaw };
 
-  enum ResponseType {
-    ResponseSuccess,
-    ResponseError
-  };
-  
+  enum ResponseType { ResponseSuccess, ResponseError };
+
 private:
   SLIPSerial *slipSerial;
   Logger *logger;
@@ -34,7 +28,8 @@ private:
   void handleOscInput(OSCMessage &oscInput);
   void handleRawInput(uint8_t c);
   void handleRawInputEnd();
-  const char* getResponseAddress(ResponseType type, bool raw);
+  const char *getResponseAddress(ResponseType type, bool raw);
+
 public:
   void begin(SLIPSerial *slipSerial, Logger *logger);
   void update();

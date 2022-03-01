@@ -2,40 +2,35 @@
 #define Logger_h
 
 #include <Arduino.h>
-#include <SLIPSerial.h>
-#include <OSCMessage.h>
 #include <OSCBundle.h>
+#include <OSCMessage.h>
+#include <SLIPSerial.h>
 
 class Logger {
 public:
   SLIPSerial *slipSerial;
 
-  enum LogType {
-    LogTypeInfo,
-    LogTypeWarning,
-    LogTypeError,
-    LogTypeDump
-  };
+  enum LogType { LogTypeInfo, LogTypeWarn, LogTypeError, LogTypeDump };
 
   void begin(SLIPSerial *slipSerial);
 
-  void log(LogType type, const char* text);
-  void info(const char* text);
-  void warning(const char* text);
-  void error(const char* text);
-  void dump(const char* text);
+  void log(LogType type, const char *text);
+  void info(const char *text);
+  void warn(const char *text);
+  void error(const char *text);
+  void dump(const char *text);
 
   void logBegin(LogType type);
   void logEnd();
   void errorBegin();
-  void warningBegin();
+  void warnBegin();
   void infoBegin();
 
   void flush();
 
 private:
   void sendMessage(OSCMessage &message);
-  const char* getLogAddress(LogType type, bool raw);
+  const char *getLogAddress(LogType type, bool raw);
 };
 
 #endif

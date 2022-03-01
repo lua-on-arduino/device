@@ -1,10 +1,7 @@
 #include <FileTransfer.h>
 
 void FileTransfer::begin(
-  SLIPSerial *slipSerial,
-  Bridge *bridge,
-  Logger *logger
-) {
+    SLIPSerial *slipSerial, Bridge *bridge, Logger *logger) {
   this->slipSerial = slipSerial;
   this->bridge = bridge;
   this->logger = logger;
@@ -20,24 +17,23 @@ void FileTransfer::begin(
 bool FileTransfer::readFile(const char *fileName, uint16_t responseId) {
   if (!sd.exists(fileName)) {
     bridge->sendResponse(
-      Bridge::ResponseError, responseId, "file doesn't exist"
-    );
+        Bridge::ResponseError, responseId, "file doesn't exist");
     return false;
   }
 
   if (!fileRead.open(fileName, O_READ)) {
     bridge->sendResponse(
-      Bridge::ResponseError, responseId, "couldn't open file"
-    );
+        Bridge::ResponseError, responseId, "couldn't open file");
     return false;
   }
 
   bridge->sendRawResponse(Bridge::ResponseSuccess, responseId);
 
   slipSerial->beginPacket();
-  while (fileRead.available()) slipSerial->write(fileRead.read());
+  while (fileRead.available())
+    slipSerial->write(fileRead.read());
   slipSerial->endPacket();
-  
+
   fileRead.close();
   return true;
 }
@@ -50,19 +46,30 @@ void FileTransfer::deleteFile(const char *fileName, uint16_t responseId) {
   }
 }
 
+void FileTransfer::renameFile(
+    const char *oldName, const char *newName, uint16_t responseId) {
+  if (!sd.exists(oldName)) {
+    bridge->sendResponse(
+        Bridge::ResponseError, responseId, "file doesn't exist");
+    return;
+  }
+
+  if (sd.rename(oldName, newName)) {
+    bridge->sendResponse(Bridge::ResponseSuccess, responseId);
+  } else {
+    bridge->sendResponse(Bridge::ResponseSuccess, responseId);
+  }
+}
 /**
  * Write a byte into a previously opened file.
- */ 
+ */
 void FileTransfer::write(uint8_t b) { fileWrite.write(b); }
 
 /**
  * Open and empty a file on the SD card for writing.
  */
 void FileTransfer::startWriteFile(
-  const char *dirName,
-  const char* baseName,
-  uint16_t responseId
-) {
+    const char *dirName, const char *baseName, uint16_t responseId) {
   writeResponseId = responseId;
 
   // Make sure the directory exists and create all missing parent directories
@@ -115,7 +122,7 @@ void FileTransfer::listDirectoryRecursive(File dir) {
   while (true) {
     file = dir.openNextFile();
     if (!file) break;
-    
+
     // Finish the last file entry with a comma.
     if (index > 0) Serial.print(",");
 
@@ -134,7 +141,7 @@ void FileTransfer::listDirectoryRecursive(File dir) {
     index++;
   }
 
-  Serial.print("]");  
+  Serial.print("]");
 }
 
 /**
@@ -154,11 +161,11 @@ void FileTransfer::listDirectory(const char *dirName, uint16_t responseId) {
   dir.open(dirName);
 
   if (!dir) bridge->sendResponse(Bridge::ResponseError, responseId);
-  
+
   bridge->sendRawResponse(Bridge::ResponseSuccess, responseId);
   slipSerial->beginPacket();
   listDirectoryRecursive(dir);
   slipSerial->endPacket();
-  
+
   dir.close();
 }

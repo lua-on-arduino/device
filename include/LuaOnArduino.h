@@ -1,13 +1,13 @@
 #ifndef LuaOnArduino_h
 #define LuaOnArduino_h
 
-#include <SLIPSerial.h>
-#include <OSCMessage.h>
-#include <OSCBundle.h>
-#include <Logger.h>
 #include <Bridge.h>
 #include <FileTransfer.h>
+#include <Logger.h>
 #include <LuaWrapper.h>
+#include <OSCBundle.h>
+#include <OSCMessage.h>
+#include <SLIPSerial.h>
 
 class LuaOnArduino {
 private:
@@ -20,8 +20,9 @@ private:
   OscInputHandler oscInputHandler;
 
   void setupLuaFirmware();
+
 public:
-  SLIPSerial* slipSerial;
+  SLIPSerial *slipSerial;
   Logger logger;
   Bridge bridge;
   FileTransfer fileTransfer;
